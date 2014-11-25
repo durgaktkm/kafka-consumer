@@ -1,11 +1,13 @@
 package co.mimosa.kafka.consumers;
 
+import co.mimosa.kafka.s3.S3EventAnalyzer;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3Client;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -17,9 +19,9 @@ import java.util.Properties;
 /**
  * Created by ramdurga on 11/23/14.
  */
-//@ImportResource("classpath*:kafka.properties")
+
 public class KafkaMultiThreadedConsumer implements SmartLifecycle {
-  //private static final Logger logger = LoggerFactory.getLogger(KafkaMultiThreadedConsumer.class);
+  private static org.slf4j.Logger logger = LoggerFactory.getLogger(KafkaMultiThreadedConsumer.class);
   private ConsumerConnector consumer;
 
   private String topic;
@@ -36,6 +38,7 @@ public class KafkaMultiThreadedConsumer implements SmartLifecycle {
   private ProfileCredentialsProvider awsCredentials;
   private String s3_bucket;
   private String s3_id;
+  private S3EventAnalyzer s3EventAnalyzer;
 
   @Override
   public void start() {
@@ -49,7 +52,7 @@ public class KafkaMultiThreadedConsumer implements SmartLifecycle {
 
     int threadNumber = 0;
     for (final KafkaStream stream : streams) {
-      executorService.submit(new ConsumerThread(stream, threadNumber,s3,s3_bucket,s3_id)); //Make it as provider pattern
+      executorService.submit(new ConsumerThread(stream, threadNumber,s3,s3EventAnalyzer,s3_bucket,s3_id)); //Make it as provider pattern
       threadNumber++;
     }
     started = true;
@@ -195,5 +198,13 @@ public class KafkaMultiThreadedConsumer implements SmartLifecycle {
 
   public String getS3_id() {
     return s3_id;
+  }
+
+  public void setS3EventAnalyzer(S3EventAnalyzer s3EventAnalyzer) {
+    this.s3EventAnalyzer = s3EventAnalyzer;
+  }
+
+  public S3EventAnalyzer getS3EventAnalyzer() {
+    return s3EventAnalyzer;
   }
 }

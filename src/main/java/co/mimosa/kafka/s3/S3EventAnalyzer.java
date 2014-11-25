@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Created by ramdurga on 11/24/14.
  */
 public class S3EventAnalyzer {
-  private static Logger logger = LoggerFactory.getLogger(S3EventAnalyzer.class);
+  private static final Logger logger = LoggerFactory.getLogger(S3EventAnalyzer.class);
   //TODO move out to amazons3.property file.
   private static final String SERIALNUMBER_REGEX = "(?<=\"serialNumber\":\")\\d{10}";
   private static final Pattern SERIALNUMBER_PATTERN = Pattern.compile(SERIALNUMBER_REGEX);
@@ -31,7 +31,7 @@ public class S3EventAnalyzer {
   private static final String DIR_SEPARATOR="/";
 
   public void saveJsonStringIntoS3(String eventJsonString,AmazonS3 s3,String bucketName,String s3Id){
-    String eventType = null;
+    String eventType;
     eventJsonString = eventJsonString.replaceAll("\n", NEWLINE_REPLACEMENT);
     int eventDataEllipsisSize = (eventJsonString.length() > 65 ? 65 : eventJsonString.length());
     logger.debug("Hash replaced content={}", eventJsonString.substring(0, eventDataEllipsisSize).trim() + "...");
@@ -45,6 +45,7 @@ public class S3EventAnalyzer {
       file.setRaw_json(eventJsonString);
       file.setSerialNumber(serialNumber);
       file.setTime_stamp(cal.getTimeInMillis());
+      //TODO remove after talking to venkatesh. Dont need this.
       if(!s3.doesBucketExist(bucketName)) {
         s3.createBucket(bucketName);
       }
@@ -59,7 +60,7 @@ public class S3EventAnalyzer {
   void uploadData(AmazonS3 s3Client,String keyName,String bucketName, S3File deviceResponseDetail) {
     try {
       ObjectMapper mapper = new ObjectMapper();
-      String data = "";
+      String data ;
       try {
         data = mapper.writeValueAsString(deviceResponseDetail);
       } catch (Exception e) {

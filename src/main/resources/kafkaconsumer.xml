@@ -24,7 +24,7 @@
     <!--<bean id="amazonS3" class="com.amazonaws.services.s3.AmazonS3Client">-->
         <!--<constructor-arg ref="amazonAWSCredentials" />-->
     <!--</bean>-->
-
+    <bean id="s3EventAnalyzerBean" class="co.mimosa.kafka.s3.S3EventAnalyzer"/>
     <bean id="taskExecutor"
           class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${numThreads}" />
@@ -44,5 +44,7 @@
         <property name="executorService" ref="taskExecutor"/>
         <property name="s3_bucket" value="${s3_bucket}" />
         <property name="s3_id" value="${s3_id}" />
+        <property name="s3EventAnalyzer" ref="s3EventAnalyzerBean" />
     </bean>
+
 </beans>
