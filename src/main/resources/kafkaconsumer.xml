@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       ">
+
+    <context:property-placeholder
+            location="classpath*:kafka.properties,amazons3.properties"
+            ignore-unresolvable="true"/>
+    <!--<util:properties id="config" location="classpath:kafka.properties" />-->
+    <!--<context:property-placeholder location="classpath:kafka.properties"/>-->
+    <!--<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">-->
+        <!--<property name="locations">-->
+            <!--<list>-->
+                <!--<value>classpath:kafka.properties</value>-->
+            <!--</list>-->
+        <!--</property>-->
+        <!--<property name="ignoreUnresolvablePlaceholders" value="true"/>-->
+    <!--</bean>-->
+
+    <bean id="amazonAWSCredentials" class="com.amazonaws.auth.profile.ProfileCredentialsProvider"/>
+    <!--<bean id="amazonS3" class="com.amazonaws.services.s3.AmazonS3Client">-->
+        <!--<constructor-arg ref="amazonAWSCredentials" />-->
+    <!--</bean>-->
+
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${numThreads}" />
+        <property name="maxPoolSize" value="${numThreads}" />
+        <property name="WaitForTasksToCompleteOnShutdown" value="true" />
+    </bean>
+    <bean id="clickstreamKafkaManager" class="co.mimosa.kafka.consumers.KafkaMultiThreadedConsumer">
+        <property name="topic" value="${topic}"/>
+        <property name="numThreads" value="${numThreads}"/>
+        <property name="zookeeperConnection" value="${zookeeperConnection}"/>
+        <property name="groupId" value="${groupId}"/>
+        <property name="zookeeperSessionTimeOutMs" value="${zookeeperSessionTimeOutMs}"/>
+        <property name="zookeeperSyncTimeMs" value="${zookeeperSyncTimeMs}"/>
+        <property name="autoCommitIntervalMs" value="${autoCommitIntervalMs}"/>
+        <property name="phase" value="${phase}"/>
+        <property name="awsCredentials" ref="amazonAWSCredentials"/>
+        <property name="executorService" ref="taskExecutor"/>
+        <property name="s3_bucket" value="${s3_bucket}" />
+        <property name="s3_id" value="${s3_id}" />
+    </bean>
+</beans>
